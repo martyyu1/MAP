@@ -402,3 +402,72 @@ dialog::backdrop { background: #1F293780; }
   .print-handout li { margin-bottom: 6pt; break-inside: avoid; }
   .print-handout small { font-size: 9pt; }
 }
+
+/* Teacher account and active-class controls. */
+.account-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.class-switch {
+  display: grid;
+  gap: 3px;
+  min-width: 180px;
+}
+.class-switch > span {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+}
+.class-switch select {
+  font-size: 15px;
+  font-weight: 800;
+}
+.topbar-inner nav {
+  margin-left: auto;
+}
+#account-dialog {
+  width: min(470px, calc(100% - 24px));
+}
+.account-intro {
+  margin-top: 16px;
+}
+.demo-account {
+  padding: 18px;
+  margin: 18px 0;
+  background: var(--blue-tint);
+  border-radius: 12px;
+}
+.demo-account p {
+  margin-top: 4px;
+}
+#account-dialog > .button {
+  width: 100%;
+}
+.class-progress-note {
+  font-size: 16px;
+  color: var(--dark-blue);
+  margin-top: 7px;
+  font-weight: 800;
+}
+@media (max-width: 1050px) {
+  .topbar-inner {
+    flex-wrap: wrap;
+    gap: 12px 18px;
+  }
+  .account-controls {
+    margin-left: auto;
+  }
+}
+@media (max-width: 480px) {
+  .topbar-inner nav {
+    margin-left: 0;
+  }
+  .account-controls {
+    width: 100%;
+    justify-content: end;
+  }
+  .class-switch {
+    flex: 1;
+  }
+}

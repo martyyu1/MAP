@@ -76,6 +76,14 @@ document.addEventListener("input", event => {
 });
 document.addEventListener("change", event => {
   const input = event.target;
+  if (input.id === "active-class") {
+    if (!state.signedIn || !state.classes.some(classroom => classroom.id === input.value)) return;
+    state.activeClassId = input.value;
+    persist();
+    refreshClassProgress();
+    document.querySelector("#active-class").focus();
+    toast("Switched to " + currentClass().name + ".");
+  }
   if (input.dataset.filter) {
     state.filters[input.dataset.filter] = input.value;
     persist();
@@ -106,6 +114,20 @@ document.addEventListener("click", event => {
   const target = event.target.closest("button");
   if (!target) return;
   const data = target.dataset;
+  if (target.hasAttribute("data-login")) openAccountDialog();
+  if (target.hasAttribute("data-demo-login")) {
+    state.signedIn = true;
+    persist();
+    document.querySelector("#account-dialog").close();
+    refreshClassProgress();
+    toast("Logged in as demo teacher.");
+  }
+  if (target.hasAttribute("data-logout")) {
+    state.signedIn = false;
+    persist();
+    refreshClassProgress();
+    toast("Logged out. Your class progress is saved in this browser.");
+  }
   if (target.hasAttribute("data-help")) openHelp();
   if (target.hasAttribute("data-tip")) {
     const tip = target.nextElementSibling;
@@ -159,7 +181,7 @@ document.addEventListener("click", event => {
     updateVideoUI();
   }
   if (data.practiced) {
-    markPracticed(data.practiced);
+    if (!markPracticed(data.practiced)) return;
     if (screen === "saved") renderSaved();
     else {
       target.disabled = true;
@@ -180,7 +202,7 @@ document.addEventListener("click", event => {
     document.querySelector("#clip-feedback").textContent = "Clip placeholder — “" + currentActivity().steps[teachStep].cue + "”";
   }
   if (data.teachPracticed) {
-    markPracticed(data.teachPracticed);
+    if (!markPracticed(data.teachPracticed)) return;
     target.disabled = true;
     target.textContent = "✓ Practiced";
   }

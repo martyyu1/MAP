@@ -14,7 +14,7 @@ function videoPlaceholder(activity, large = false) {
 }
 function renderActivity(activity) {
   document.querySelector("#main").innerHTML = `<div class="page activity-page ${categoryClass(activity.category)}"><a class="back-link" href="#/library?category=${encodeURIComponent(activity.category)}">← Movement Library</a>
-    <div class="activity-title"><div><span class="category-label">${activity.category} · ${activity.skill}</span><h1>${activity.name}</h1></div>${state.practiced[activity.id] ? `<span class="practice-status">${practicedText(activity)}</span>` : ""}</div>
+    <div class="activity-title"><div><span class="category-label">${activity.category} · ${activity.skill}</span><h1>${activity.name}</h1></div>${practiceRecords()[activity.id] ? `<span class="practice-status">${practicedText(activity)}</span>` : ""}</div>
     <div class="activity-meta"><span class="difficulty-caption">Difficulty ${DifficultyStars(activity.difficulty)} <span>(${activity.difficulty} of 4)</span></span>${EffortPill(activity.effort)}<span>${activity.duration} min</span><span>${activity.space === "Either" ? "Indoor or outdoor" : activity.space}</span><span>${activity.group}</span></div>
     <p class="goal"><strong>Goal</strong> ${activity.goal}</p>
     <div class="activity-actions">${SaveButton(activity, true)}<a class="button primary" href="#/teach/${activity.id}">Teach ${icon("play")}</a><a class="button secondary" href="#/watch/${activity.id}">Watch with the class</a><button class="button secondary" data-print-activity="${activity.id}">${icon("print")} Print setup handout</button></div>
@@ -23,7 +23,7 @@ function renderActivity(activity) {
       <aside class="setup-panel"><h2>Materials</h2>${materialsChecklist(activity)}<h2>Setup</h2><p>${activity.setup}</p><div class="teacher-note"><strong>Watch. Guide. Practice.</strong><p>Use the video to introduce the skill, guide children through the steps, then give them time to practice.</p></div></aside></div>
     <section class="steps-section" aria-labelledby="steps-title"><h2 id="steps-title">Set up and steps</h2><ol class="steps-list">${activity.steps.map((step, i) => `<li>${photoPlaceholder(activity, step, i)}<div><span class="step-number">${i + 1}</span><h3>${step.title}</h3><p>${step.text}</p><blockquote>“${step.cue}”</blockquote></div></li>`).join("")}</ol><p class="practice-prompt">Then let children practice.</p></section>
     <section class="adjustments" aria-label="Adapt the activity">${adjustment(activity, "easier", "− Make it easier")}${adjustment(activity, "challenge", "+ Add a challenge")}</section>
-    <div class="practice-action"><span>After children have had time to practice</span><button class="button success" data-practiced="${activity.id}" ${state.practiced[activity.id] ? "disabled" : ""}>${state.practiced[activity.id] ? practicedText(activity) : "✓ Mark as practiced"}</button></div>
+    <div class="practice-action"><span>${state.signedIn ? "Practice for " + escapeHtml(currentClass().name) : "Log in to track practice for your class."}</span><button class="button success" data-practiced="${activity.id}" ${practiceRecords()[activity.id] ? "disabled" : ""}>${practiceRecords()[activity.id] ? practicedText(activity) : "✓ Mark as practiced"}</button></div>
     <section class="related-section"><h2>More ways to practice ${activity.skill}</h2><div class="activity-grid">${activity.related.map(findActivity).map(ActivityCard).join("")}</div></section></div>`;
 }
 function adjustment(activity, kind, title) {

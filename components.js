@@ -63,7 +63,7 @@ function ActivityArt(activity, label = "Activity illustration") {
   </svg>`;
 }
 function ActivityCard(activity) {
-  const practiced = Boolean(state.practiced[activity.id]);
+  const practiced = Boolean(practiceRecords()[activity.id]);
   return `<article class="activity-card ${categoryClass(activity.category)}">
     <div class="card-image"><a href="#/activity/${activity.id}" tabindex="-1" aria-hidden="true">${ActivityArt(activity)}<span class="play-badge">${icon("play", 18)}</span></a>${SaveButton(activity)}${practiced ? `<span class="practiced-flag">${icon("check", 16)} Practiced</span>` : ""}</div>
     <div class="card-body"><span class="category-label">${activity.category} · ${activity.skill}</span><h3><a href="#/activity/${activity.id}">${activity.name}</a></h3>
@@ -76,10 +76,10 @@ function FilterPanel(location) {
     <p class="helper" id="${location}-equipment-help">${EQUIPMENT_HELP}</p>`;
 }
 function practicedText(activity) {
-  if (!state.practiced[activity.id]) return "";
-  const day = new Date(state.practiced[activity.id]).toLocaleDateString("en-US", { weekday: "short" });
+  if (!practiceRecords()[activity.id]) return "";
+  const day = new Date(practiceRecords()[activity.id]).toLocaleDateString("en-US", { weekday: "short" });
   return "✓ Practiced " + day;
 }
 function renderTopbar() {
-  document.querySelector("#topbar").innerHTML = `<div class="topbar-inner">${Logo()}<nav aria-label="Main navigation"><a href="#/library" class="${location.hash.startsWith("#/library") ? "active" : ""}">Find Lesson</a><a href="#/saved" class="${location.hash === "#/saved" ? "active" : ""}">Saved (${state.saved.length})</a><button data-help>Help</button></nav></div>`;
+  document.querySelector("#topbar").innerHTML = `<div class="topbar-inner">${Logo()}<nav aria-label="Main navigation"><a href="#/library" class="${location.hash.startsWith("#/library") ? "active" : ""}">Find Lesson</a><a href="#/saved" class="${location.hash === "#/saved" ? "active" : ""}">Saved (${state.saved.length})</a><button data-help>Help</button></nav>${AccountControls()}</div>`;
 }

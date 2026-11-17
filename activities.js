@@ -5,7 +5,7 @@ const CATEGORIES = {
 };
 const EQUIPMENT_HELP = "Things in my room means items like paper plates, tape, socks, or a ball.";
 const CONTENT_NOTICE = "Placeholder activity content · To be reviewed by Dr. Palmer";
-const ABOUT_MAP = "MAP was developed by Dr. Kara Palmer at the University of Michigan School of Kinesiology to help young children build foundational movement skills through activities that fit into classroom routines. Videos teach each skill, teachers guide practice, and children practice. Free to use, no login.";
+const ABOUT_MAP = "MAP was developed by Dr. Kara Palmer at the University of Michigan School of Kinesiology to help young children build foundational movement skills through activities that fit into classroom routines. Videos teach each skill, teachers guide practice, and children practice. Free to use. Log in to track practice for each class.";
 const FILTER_FIELDS = [
   { key: "group", label: "Group size", options: [["", "Any"], ["Small group", "Small group"], ["Whole class", "Whole class"]] },
   { key: "space", label: "Space", options: [["", "Any"], ["Indoor", "Indoor"], ["Outdoor", "Outdoor"]] },
