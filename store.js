@@ -1,0 +1,52 @@
+// Versioned storage keeps this prototype independent of earlier versions.
+const STORAGE_KEY = "map-v02";
+const emptyFilters = () => ({ group: "", space: "", time: "", equipment: "" });
+const defaultState = () => ({
+  saved: [], practiced: {}, recent: [], filters: emptyFilters(),
+  materialChecks: {}, showClassStars: false, starAwards: {}
+});
+let stored;
+try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch {}
+const state = { ...defaultState(), ...stored, filters: { ...emptyFilters(), ...stored?.filters } };
+const knownIds = new Set(activities.map(activity => activity.id));
+state.saved = [...new Set(state.saved)].filter(id => knownIds.has(id));
+state.recent = [...new Set(state.recent)].filter(id => knownIds.has(id)).slice(0, 5);
+function persist() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch { toast("Browser storage is unavailable. Changes will last for this visit."); }
+}
+function findActivity(id) { return activities.find(activity => activity.id === id); }
+function markPracticed(id) {
+  if (!state.practiced[id]) {
+    state.practiced[id] = new Date().toISOString();
+    if (state.showClassStars) state.starAwards[id] = findActivity(id).difficulty;
+    persist();
+    toast("Activity marked as practiced.");
+  }
+}
+function recordRecent(id) {
+  state.recent = [id, ...state.recent.filter(item => item !== id)].slice(0, 5);
+  persist();
+}
+function matchesActivity(activity, filters = state.filters, category = "", search = "", skills = {}) {
+  return (!category || activity.category === category) &&
+    (!skills[activity.category] || activity.skill === skills[activity.category]) &&
+    (!search || (activity.name + " " + activity.skill + " " + activity.category).toLowerCase().includes(search.toLowerCase().trim())) &&
+    (!filters.group || activity.group === filters.group) &&
+    (!filters.space || activity.space === "Either" || activity.space === filters.space) &&
+    (!filters.time || activity.duration <= Number(filters.time)) &&
+    (!filters.equipment || activity.equipment === filters.equipment);
+}
+function combinedMaterials() {
+  const materials = new Map();
+  state.saved.forEach(id => {
+    findActivity(id).materials.forEach(material => {
+      const key = material.name.toLowerCase();
+      const existing = materials.get(key) ?? { key, name: material.name, alternatives: new Set(), activities: [] };
+      existing.alternatives.add(material.substitution);
+      existing.activities.push(findActivity(id).name);
+      materials.set(key, existing);
+    });
+  });
+  return [...materials.values()].sort((a, b) => a.name.localeCompare(b.name));
+}

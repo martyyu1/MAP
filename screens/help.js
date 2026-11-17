@@ -1,0 +1,8 @@
+function openHelp() {
+  const dialog = document.querySelector("#help-dialog");
+  dialog.innerHTML = `<div class="dialog-heading"><h2 id="help-title">A little help getting started</h2><form method="dialog"><button class="button secondary" aria-label="Close Help">${icon("close")}</button></form></div>
+    <dl class="help-topics"><dt>Difficulty stars</dt><dd>Stars show how hard the skill is, from 1 easy to 4 hard. Tap the stars anywhere for a reminder.</dd><dt>Effort</dt><dd>Low, Medium, or High shows how much energy the activity takes. It is separate from skill difficulty.</dd><dt>Save and Saved</dt><dd>Tap a heart to save an activity. Open Saved to find it again and prepare a combined materials checklist.</dd><dt>Mark as practiced</dt><dd>Mark as practiced only changes when you tap the button, not when you watch a video.</dd></dl>
+    <label class="class-stars-option"><input type="checkbox" id="class-stars-toggle" ${state.showClassStars ? "checked" : ""}><span><strong>Show class stars</strong><small>Optional. When on, newly practiced activities add their difficulty number to the island's Class stars counter. Each activity counts once.</small></span></label>
+    <p class="helper">Saved activities, practiced status, materials check marks, recent activities, and filters are stored in this browser.</p><p class="content-notice">${CONTENT_NOTICE}</p>`;
+  dialog.showModal();
+}
