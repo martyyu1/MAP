@@ -17,9 +17,11 @@ function icon(name, size = 20) {
 function Logo() {
   return `<a class="logo" href="#/" aria-label="MAP, Movement, Activity and Play, Home"><svg width="103" height="48" viewBox="0 0 103 48" aria-hidden="true"><text x="0" y="37" font-family="Nunito, sans-serif" font-size="40" font-weight="900" letter-spacing="-2"><tspan fill="#FF7A59">M</tspan><tspan fill="#2F80ED">A</tspan><tspan fill="#FF7A59">P</tspan></text></svg><span>Movement,<br>Activity &amp; Play</span></a>`;
 }
-function DifficultyStars(difficulty) {
-  const explanation = "Difficulty: how hard the skill is, from 1 easy to 4 hard.";
-  return `<span class="difficulty"><button type="button" class="star-button" data-tip aria-label="Difficulty ${difficulty} of 4. ${explanation}" aria-expanded="false" title="${explanation}"><span aria-hidden="true">${"★".repeat(difficulty)}<span class="unfilled">${"☆".repeat(4 - difficulty)}</span></span></button><span class="star-tooltip" hidden>${explanation}</span></span>`;
+function DifficultyStars(activity) {
+  const practiced = Boolean(practiceRecords()[activity.id]);
+  const explanation = "Star count shows difficulty, from 1 easy to 4 hard. Hollow stars mean not yet practiced; solid stars mean practiced for the current class.";
+  const status = practiced ? "Practiced" : "Not yet practiced";
+  return `<span class="difficulty"><button type="button" class="star-button ${practiced ? "earned-stars" : ""}" data-tip aria-label="Difficulty ${activity.difficulty} of 4. ${status}. ${explanation}" aria-expanded="false" title="${explanation}"><span aria-hidden="true">${(practiced ? "★" : "☆").repeat(activity.difficulty)}</span></button><span class="star-tooltip" hidden>${explanation}</span></span>`;
 }
 function EffortPill(effort) {
   return `<span class="effort effort-${effort.toLowerCase()}">${effort} effort</span>`;
@@ -28,24 +30,22 @@ function SaveButton(activity, full = false) {
   const saved = state.saved.includes(activity.id);
   return `<button class="save-button ${saved ? "is-saved" : ""} ${full ? "button secondary" : ""}" data-save="${activity.id}" aria-pressed="${saved}" aria-label="${saved ? "Unsave" : "Save"} ${activity.name}">${icon("heart")}${full ? `<span>${saved ? "Saved" : "Save"}</span>` : ""}</button>`;
 }
-// Flat, inline illustrations are intentionally simple and entirely local.
+// The same locally stored storybook artwork is used on Home and the map.
 function IslandArt(category) {
-  const coral = category === "Locomotor";
-  const color = coral ? "#FF7A59" : "#2F80ED";
-  return `<svg class="island-art" viewBox="0 0 400 180" aria-hidden="true">
-    <ellipse cx="205" cy="135" rx="158" ry="34" fill="${coral ? "#F8BCA6" : "#9FC8FA"}"/>
-    <path d="M53 120Q37 91 81 80Q98 51 140 65Q173 36 208 63Q257 45 281 75Q337 64 351 105Q366 144 312 146H98Q58 148 53 120Z" fill="${coral ? "#FFC9AF" : "#A5D8CD"}"/>
-    <path d="M78 120Q124 99 152 113T226 103T317 110" fill="none" stroke="#FFF7E4" stroke-width="12" stroke-linecap="round"/>
-    <path d="m115 85 24-43 25 43Z" fill="${color}"/><path d="m221 76 32-52 32 52Z" fill="${coral ? "#E56A4A" : "#2E7E6E"}"/>
-    <circle cx="186" cy="111" r="12" fill="${color}"/><circle cx="186" cy="111" r="5" fill="#FFF7E4"/>
-    <path d="M40 155h38m244 3h39M17 134h19" stroke="${color}" opacity=".55" stroke-width="3" stroke-linecap="round"/>
-    <path d="M298 86V58m-9 10 9 8 9-8" stroke="${coral ? "#97543A" : "#226C5F"}" stroke-width="5" stroke-linecap="round" fill="none"/>
-    <circle cx="337" cy="36" r="14" fill="#FFCF73"/>
-    <path d="M65 42q12-15 24 0m-12 0q12-15 24 0" fill="none" stroke="#536878" stroke-width="2"/>
-  </svg>`;
+  const filename = category === "Locomotor" ? "locomotor-island" : "object-control-island";
+  return `<img class="island-art" src="assets/${filename}.png" alt="" width="1584" height="992" decoding="async">`;
+}
+function IslandCover(category) {
+  return `<div class="category-cover">${IslandArt(category)}
+    <svg class="cover-route" viewBox="0 0 1000 625" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M230 390C290 390 310 260 420 260S590 420 750 380"/>
+      <circle cx="230" cy="390" r="13"/><circle cx="420" cy="260" r="13"/><circle cx="750" cy="380" r="13"/>
+    </svg>
+    <img class="cover-explorer" src="assets/explorer-fox.png" alt="" width="60" height="72">
+  </div>`;
 }
 function ActivityArt(activity, label = "Activity illustration") {
-  const coral = activity.category === "Locomotor";
+  const locomotor = activity.category === "Locomotor";
   const action = {
     Run: "M63 64 83 57 100 67M80 62 75 83 58 98M75 83 98 94",
     Gallop: "M63 64 82 57 97 47M81 61 88 82 107 85M88 82 72 102",
@@ -55,11 +55,11 @@ function ActivityArt(activity, label = "Activity illustration") {
     Kick: "M62 61 81 67 97 60M81 67 77 86 67 104M77 86 105 86"
   }[activity.skill];
   return `<svg viewBox="0 0 270 150" role="img" aria-label="${label}" class="activity-art">
-    <rect width="270" height="150" fill="${coral ? "#FFE3DB" : "#DCEBFF"}"/>
-    <circle cx="226" cy="29" r="15" fill="#FFCF73"/><path d="M0 118Q70 97 128 120T270 114V150H0Z" fill="${coral ? "#F8C0AC" : "#B5D8F2"}"/>
+    <rect width="270" height="150" fill="${locomotor ? "var(--locomotor-tint)" : "#DCEBFF"}"/>
+    <circle cx="226" cy="29" r="15" fill="#FFCF73"/><path d="M0 118Q70 97 128 120T270 114V150H0Z" fill="${locomotor ? "var(--locomotor-land)" : "#B5D8F2"}"/>
     <path d="M19 128h28m159 5h25" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
     <g transform="translate(28 7)"><circle cx="81" cy="43" r="10" fill="#1F2937"/><path d="${action}" fill="none" stroke="#1F2937" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></g>
-    ${coral ? '<path d="m196 99 9-16 9 16Z" fill="#FF7A59"/>' : '<circle cx="188" cy="95" r="13" fill="#2F80ED"/><path d="M176 91q12 14 25 0" fill="none" stroke="#fff" stroke-width="2"/>'}
+    ${locomotor ? '<path d="m196 99 9-16 9 16Z" fill="var(--locomotor)"/>' : '<circle cx="188" cy="95" r="13" fill="#2F80ED"/><path d="M176 91q12 14 25 0" fill="none" stroke="#fff" stroke-width="2"/>'}
   </svg>`;
 }
 function ActivityCard(activity) {
@@ -67,7 +67,7 @@ function ActivityCard(activity) {
   return `<article class="activity-card ${categoryClass(activity.category)}">
     <div class="card-image"><a href="#/activity/${activity.id}" tabindex="-1" aria-hidden="true">${ActivityArt(activity)}<span class="play-badge">${icon("play", 18)}</span></a>${SaveButton(activity)}${practiced ? `<span class="practiced-flag">${icon("check", 16)} Practiced</span>` : ""}</div>
     <div class="card-body"><span class="category-label">${activity.category} · ${activity.skill}</span><h3><a href="#/activity/${activity.id}">${activity.name}</a></h3>
-    <div class="card-level">${DifficultyStars(activity.difficulty)}${EffortPill(activity.effort)}</div><p class="card-time">${activity.duration} min <span>·</span> ${activity.space === "Either" ? "Indoor or outdoor" : activity.space}</p><p class="card-materials">${activity.materials.map(item => item.name).join(", ") || "Nothing needed"}</p></div>
+    <div class="card-level">${DifficultyStars(activity)}${EffortPill(activity.effort)}</div><p class="card-time">${activity.duration} min <span>·</span> ${activity.space === "Either" ? "Indoor or outdoor" : activity.space}</p><p class="card-materials">${activity.materials.map(item => item.name).join(", ") || "Nothing needed"}</p></div>
   </article>`;
 }
 function FilterPanel(location) {
@@ -80,6 +80,31 @@ function practicedText(activity) {
   const day = new Date(practiceRecords()[activity.id]).toLocaleDateString("en-US", { weekday: "short" });
   return "✓ Practiced " + day;
 }
+function PracticeButton(activity, placement = "activity") {
+  const practiced = Boolean(practiceRecords()[activity.id]);
+  const classes = placement === "saved" ? "text-button" : "button success";
+  const completedText = placement === "teach" ? "✓ Practiced" : practicedText(activity);
+  const label = practiced ? completedText + " · Undo" : "✓ Mark as practiced";
+  const classroom = state.signedIn ? " for " + currentClass().name : "";
+  const accessibleLabel = practiced
+    ? "Undo practiced status for " + activity.name + classroom
+    : "Mark " + activity.name + " as practiced" + classroom;
+  return `<button class="${classes}" data-practiced="${activity.id}" aria-pressed="${practiced}" aria-label="${escapeHtml(accessibleLabel)}">${label}</button>`;
+}
 function renderTopbar() {
   document.querySelector("#topbar").innerHTML = `<div class="topbar-inner">${Logo()}<nav aria-label="Main navigation"><a href="#/library" class="${location.hash.startsWith("#/library") ? "active" : ""}">Find Lesson</a><a href="#/saved" class="${location.hash === "#/saved" ? "active" : ""}">Saved (${state.saved.length})</a><button data-help>Help</button></nav>${AccountControls()}</div>`;
+  renderClassStars();
+}
+
+
+// A persistent summary keeps class progress visible while scrolling.
+function renderClassStars() {
+  const summary = document.querySelector("#class-stars-summary");
+  const visible = state.signedIn && state.showClassStars;
+  summary.hidden = !visible;
+  if (!visible) {
+    summary.replaceChildren();
+    return;
+  }
+  summary.innerHTML = `<div class="class-stars-inner"><span class="class-stars-symbol" aria-hidden="true">★</span><strong class="class-stars-total">${classStarTotal()}</strong><span class="class-stars-title">Class stars</span><span class="class-stars-name">${escapeHtml(currentClass().name)}</span></div>`;
 }

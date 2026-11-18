@@ -107,7 +107,7 @@ document.addEventListener("change", event => {
   if (input.id === "class-stars-toggle") {
     state.showClassStars = input.checked;
     persist();
-    if (screen === "library") updateLibrary();
+    renderClassStars();
   }
 });
 document.addEventListener("click", event => {
@@ -181,12 +181,17 @@ document.addEventListener("click", event => {
     updateVideoUI();
   }
   if (data.practiced) {
-    if (!markPracticed(data.practiced)) return;
+    const practiced = Boolean(practiceRecords()[data.practiced]);
+    const changed = practiced ? unmarkPracticed(data.practiced) : markPracticed(data.practiced);
+    if (!changed) return;
     if (screen === "saved") renderSaved();
+    else if (screen === "teach") renderTeach(currentActivity(), false);
     else {
-      target.disabled = true;
-      target.textContent = practicedText(currentActivity());
+      target.outerHTML = PracticeButton(currentActivity());
+      document.querySelector(".activity-meta .difficulty").outerHTML = DifficultyStars(currentActivity());
     }
+    renderClassStars();
+    document.querySelector('[data-practiced="' + data.practiced + '"]').focus({ preventScroll: true });
   }
   if (target.hasAttribute("data-teach-next")) {
     teachStep = Math.min(3, teachStep + 1);
@@ -201,11 +206,7 @@ document.addEventListener("click", event => {
   if (target.hasAttribute("data-replay")) {
     document.querySelector("#clip-feedback").textContent = "Clip placeholder — “" + currentActivity().steps[teachStep].cue + "”";
   }
-  if (data.teachPracticed) {
-    if (!markPracticed(data.teachPracticed)) return;
-    target.disabled = true;
-    target.textContent = "✓ Practiced";
-  }
+
 });
 window.addEventListener("hashchange", route);
 route();

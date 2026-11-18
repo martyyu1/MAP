@@ -13,20 +13,22 @@ const FILTER_FIELDS = [
   { key: "equipment", label: "Equipment", options: [["", "Any"], ["Nothing needed", "Nothing needed"], ["Things in my room", "Things in my room"], ["Needs gathering", "Needs gathering"]] }
 ];
 // Supply approved video URLs, timestamps, and images here when they are available.
+// Movement-first titles reference the MAP Sessions vocabulary (Run, Gallop,
+// Hop, Throw, Roll, Kick). IDs stay stable for existing saved/class records.
 const rawActivities = [
-  ["feed-the-fish", "Feed the Fish", "Throw", 2, "Low", 15, "Either", "Things in my room", "Small group", [["Beanbags", "Rolled socks"], ["Basket", "Box"], ["Tape", "A visible floor line"]]],
-  ["sea-star-toss", "Sea Star Toss", "Throw", 2, "Medium", 10, "Indoor", "Things in my room", "Small group", [["Paper plates", "Paper squares"], ["Beanbags", "Rolled socks"]]],
-  ["splash-target", "Splash Target", "Throw", 3, "Medium", 10, "Outdoor", "Things in my room", "Small group", [["Beanbags", "Rolled socks"], ["Box", "Hoop if available"]]],
-  ["sea-creature-gallop", "Sea Creature Gallop", "Gallop", 2, "High", 10, "Either", "Things in my room", "Whole class", [["Tape", "Cones if available"]]],
-  ["seahorse-race", "Seahorse Race", "Gallop", 3, "High", 10, "Either", "Nothing needed", "Whole class", []],
-  ["lily-pad-hop", "Lily Pad Hop", "Hop", 3, "Medium", 10, "Indoor", "Things in my room", "Small group", [["Paper plates", "Hoops if available"]]],
-  ["stepping-stones", "Stepping Stones", "Hop", 2, "Low", 10, "Indoor", "Things in my room", "Small group", [["Paper plates", "Tape marks"]]],
-  ["rolling-waves", "Rolling Waves", "Roll", 1, "Low", 10, "Indoor", "Things in my room", "Small group", [["Playground ball", "Soft ball"]]],
-  ["turtle-roll", "Turtle Roll", "Roll", 2, "Low", 10, "Indoor", "Things in my room", "Small group", [["Soft ball", "Playground ball"]]],
-  ["treasure-kick", "Treasure Kick", "Kick", 2, "Medium", 15, "Outdoor", "Needs gathering", "Whole class", [["Ball", "Soft ball"], ["Cones", "Hoops laid flat"]]],
-  ["tide-kick", "Tide Kick", "Kick", 3, "Medium", 10, "Outdoor", "Needs gathering", "Whole class", [["Ball", "Soft ball"], ["Cones", "Hoops laid flat"]]],
-  ["dolphin-dash", "Dolphin Dash", "Run", 1, "High", 10, "Outdoor", "Nothing needed", "Whole class", []],
-  ["wave-chase", "Wave Chase", "Run", 2, "Medium", 10, "Either", "Nothing needed", "Whole class", []]
+  ["feed-the-fish", "Throwing to a Target", "Throw", 2, "Low", 15, "Either", "Things in my room", "Small group", [["Beanbags", "Rolled socks"], ["Basket", "Box"], ["Tape", "A visible floor line"]]],
+  ["sea-star-toss", "Throwing to Floor Targets", "Throw", 2, "Medium", 10, "Indoor", "Things in my room", "Small group", [["Paper plates", "Paper squares"], ["Beanbags", "Rolled socks"]]],
+  ["splash-target", "Outdoor Target Throwing", "Throw", 3, "Medium", 10, "Outdoor", "Things in my room", "Small group", [["Beanbags", "Rolled socks"], ["Box", "Hoop if available"]]],
+  ["sea-creature-gallop", "Galloping", "Gallop", 2, "High", 10, "Either", "Things in my room", "Whole class", [["Tape", "Cones if available"]]],
+  ["seahorse-race", "Galloping Across a Space", "Gallop", 3, "High", 10, "Either", "Nothing needed", "Whole class", []],
+  ["lily-pad-hop", "Hopping Between Markers", "Hop", 3, "Medium", 10, "Indoor", "Things in my room", "Small group", [["Paper plates", "Hoops if available"]]],
+  ["stepping-stones", "Single-Leg Hopping", "Hop", 2, "Low", 10, "Indoor", "Things in my room", "Small group", [["Paper plates", "Tape marks"]]],
+  ["rolling-waves", "Rolling to a Partner", "Roll", 1, "Low", 10, "Indoor", "Things in my room", "Small group", [["Playground ball", "Soft ball"]]],
+  ["turtle-roll", "Controlled Ball Rolling", "Roll", 2, "Low", 10, "Indoor", "Things in my room", "Small group", [["Soft ball", "Playground ball"]]],
+  ["treasure-kick", "Kicking into a Goal", "Kick", 2, "Medium", 15, "Outdoor", "Needs gathering", "Whole class", [["Ball", "Soft ball"], ["Cones", "Hoops laid flat"]]],
+  ["tide-kick", "Target Kicking", "Kick", 3, "Medium", 10, "Outdoor", "Needs gathering", "Whole class", [["Ball", "Soft ball"], ["Cones", "Hoops laid flat"]]],
+  ["dolphin-dash", "Running and Stopping", "Run", 1, "High", 10, "Outdoor", "Nothing needed", "Whole class", []],
+  ["wave-chase", "Running to a Finish Line", "Run", 2, "Medium", 10, "Either", "Nothing needed", "Whole class", []]
 ];
 const skillContent = {
   Run: {

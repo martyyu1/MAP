@@ -2,10 +2,21 @@
 let libraryState = { category: "", skills: {}, search: "", sort: "easiest", view: "grid", about: false };
 let islandSelection = "";
 let islandTimer;
+let islandMotion;
+// Stops stay on the open meadow, with enough room for readable lesson labels.
+// The artwork keeps its proportions on small screens inside a scrollable map.
 function islandPositions() {
-  return matchMedia("(max-width: 480px)").matches
-    ? [[18, 82], [50, 68], [78, 52], [48, 39], [20, 24], [64, 12]]
-    : [[14, 70], [30, 43], [46, 64], [61, 33], [77, 53], [88, 27]];
+  return [[20, 68], [22, 36], [48, 66], [48, 32], [74, 67], [72, 43]];
+}
+function islandTrail(positions) {
+  const [firstX, firstY] = positions[0];
+  let trail = "M" + firstX * 10 + " " + firstY * 6.25;
+  positions.slice(1).forEach(([x, y], index) => {
+    const [previousX, previousY] = positions[index];
+    const middleX = (previousX + x) * 5;
+    trail += "C" + middleX + " " + previousY * 6.25 + " " + middleX + " " + y * 6.25 + " " + x * 10 + " " + y * 6.25;
+  });
+  return trail;
 }
 function renderLibrary(params) {
   clearTimeout(islandTimer);
@@ -16,7 +27,7 @@ function renderLibrary(params) {
   };
   document.querySelector("#main").innerHTML = `<div class="page library-page"><div class="page-heading"><div><a class="back-link" href="#/">← Home</a><h1>Movement Library</h1></div><label class="search-field"><span class="sr-only">Search movements</span><input id="movement-search" type="search" placeholder="Search movements" autocomplete="off"></label></div>
     <div class="library-layout"><aside class="filter-sidebar"><button class="filter-disclosure button secondary" id="mobile-filters" aria-expanded="false" aria-controls="library-filters">${icon("filter")} Filters</button><div id="library-filters"><h2>Filters</h2><fieldset class="category-filter"><legend>Category</legend>${["", ...Object.keys(CATEGORIES)].map(category => `<label class="${category ? categoryClass(category) : ""}"><input type="radio" name="category" value="${category}" ${libraryState.category === category ? "checked" : ""}> ${category || "All activities"}</label>`).join("")}</fieldset>${FilterPanel("library")}</div></aside>
-    <div class="library-results"><div class="results-toolbar"><div><h2 class="result-count" id="result-count" aria-live="polite"></h2><p class="helper">Stars show how hard the skill is. Effort shows how much energy it takes.</p></div><label class="sort-label">Sort<select id="sort"><option value="easiest">Easiest first</option><option value="shortest">Shortest first</option></select></label></div>
+    <div class="library-results"><div class="results-toolbar"><div><h2 class="result-count" id="result-count" aria-live="polite"></h2><p class="helper">Star count shows difficulty. Hollow stars mean not yet practiced; solid stars mean practiced. Effort shows how much energy it takes.</p></div><label class="sort-label">Sort<select id="sort"><option value="easiest">Easiest first</option><option value="shortest">Shortest first</option></select></label></div>
     <div id="filter-chips" class="filter-chips"></div><div id="category-about"></div><div id="view-switch"></div><div id="library-content"></div></div></div>
     <p class="content-notice">${CONTENT_NOTICE}</p></div>`;
   updateLibrary();
@@ -71,35 +82,69 @@ function renderGrid(matches) {
 function renderIsland(matches) {
   const category = libraryState.category;
   const visible = [...matches].sort((a, b) => a.difficulty - b.difficulty || a.duration - b.duration).slice(0, 6);
-  const stopPositions = islandPositions();
-  const trail = stopPositions.map(([x, y], index) => (index ? "L" : "M") + (x * 9) + " " + (y * 4.5)).join(" ");
+  const positions = islandPositions().slice(0, visible.length);
   if (!visible.length) return skillHeader(category) + emptyLibrary();
-  return `${skillHeader(category)}<div class="island-board ${categoryClass(category)}">
-    <svg class="island-terrain" viewBox="0 0 900 450" preserveAspectRatio="none" aria-hidden="true"><path class="island-sand" d="M40 285Q5 170 95 115Q105 32 250 70Q360 5 466 56Q610 15 715 82Q870 62 865 190Q922 270 817 345Q730 445 620 381Q450 445 337 385Q140 432 67 350Z"/><path class="island-grass" d="M64 276Q39 172 118 129Q133 62 250 94Q365 30 470 80Q610 43 713 107Q842 84 841 190Q890 268 802 326Q722 411 620 358Q449 418 338 360Q143 409 88 334Z"/><path class="island-path" d="${trail}"/><path d="m114 104 24-45 24 45Zm565 242 26-52 26 52Z" fill="#549A79"/><circle cx="765" cy="74" r="18" fill="#FFCE76"/></svg>
-    <div class="island-character" aria-label="Explorer character" style="left:7%;top:77%"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="m8 17 2-13 11 8h7L40 4l1 15-7 21-20 1Z" fill="#FF7A59"/><path d="m11 24 13 8 14-8-6 17H17Z" fill="#FFF5DF"/><circle cx="17" cy="23" r="2" fill="#1F2937"/><circle cx="31" cy="23" r="2" fill="#1F2937"/><path d="m21 31 3 4 3-4Z" fill="#1F2937"/></svg></div>
-    ${visible.map((activity, i) => `<button class="island-stop" data-island-stop="${activity.id}" data-position="${i}" style="--x:${stopPositions[i][0]}%;--y:${stopPositions[i][1]}%" aria-label="Preview ${activity.name}, difficulty ${activity.difficulty} of 4${practiceRecords()[activity.id] ? ", practiced" : ""}"><span class="stop-dot ${practiceRecords()[activity.id] ? "practiced-stop" : ""}">${practiceRecords()[activity.id] ? icon("check") : i + 1}</span><span class="stop-label"><strong>${activity.name}</strong><span aria-hidden="true">${"★".repeat(activity.difficulty)}${"☆".repeat(4 - activity.difficulty)}</span></span></button>`).join("")}</div>
-    <div class="island-under"><p>Every stop is open. Choose any activity.</p>${state.signedIn && state.showClassStars ? `<strong class="class-stars">Class stars: ${Object.values(classStarAwards()).reduce((sum, number) => sum + number, 0)} ★</strong>` : ""}${matches.length > 6 ? '<button class="text-button" data-view="grid">See all in grid</button>' : ""}</div><div id="island-preview" aria-live="polite"><p class="helper">Choose a stop to preview an activity.</p></div>`;
+  const trail = islandTrail(positions);
+  const [startX, startY] = positions[0];
+  islandMotion = null;
+  return `${skillHeader(category)}
+    <div class="island-map-viewport" role="region" aria-label="${category} activity island. Scroll sideways to explore on a small screen." tabindex="0">
+      <div class="island-board ${categoryClass(category)}">
+        ${IslandArt(category)}
+        <svg class="island-trails" viewBox="0 0 1000 625" preserveAspectRatio="none" aria-hidden="true">
+          <path class="island-path-edge" d="${trail}"/>
+          <path class="island-path" d="${trail}"/>
+          <path class="island-route" d="${trail}"/>
+        </svg>
+        <div class="island-character" data-distance="0" style="left:${startX}%;top:${startY}%" aria-hidden="true"><img src="assets/explorer-fox.png" alt="" width="64" height="76"></div>
+        ${visible.map((activity, index) => `<button class="island-stop" data-island-stop="${activity.id}" data-position="${index}" style="--x:${positions[index][0]}%;--y:${positions[index][1]}%" aria-pressed="false" aria-label="Preview ${activity.name}, difficulty ${activity.difficulty} of 4${practiceRecords()[activity.id] ? ", practiced" : ""}">
+          <span class="stop-dot ${practiceRecords()[activity.id] ? "practiced-stop" : ""}">${practiceRecords()[activity.id] ? icon("check", 22) : index + 1}</span>
+          <span class="stop-label"><strong>${activity.name}</strong><span class="stop-stars ${practiceRecords()[activity.id] ? "earned-stars" : ""}" aria-hidden="true">${(practiceRecords()[activity.id] ? "★" : "☆").repeat(activity.difficulty)}</span></span>
+        </button>`).join("")}
+      </div>
+    </div>
+    <p class="map-scroll-hint">Swipe sideways to explore the island.</p>
+    <div class="island-under"><p>Every stop is open. Choose any activity.</p>${matches.length > 6 ? '<button class="text-button" data-view="grid">See all in grid</button>' : ""}</div>
+    <div id="island-preview" aria-live="polite"><p class="helper">Choose a stop to preview an activity.</p></div>`;
 }
 function selectIslandStop(button) {
   clearTimeout(islandTimer);
   const index = Number(button.dataset.position);
   const character = document.querySelector(".island-character");
-  const positions = [[7, 77], ...islandPositions()];
-  const previous = Number(character.dataset.position ?? 0);
-  const destination = index + 1;
-  const path = positions.slice(Math.min(previous, destination), Math.max(previous, destination) + 1);
-  if (previous > destination) path.reverse();
-  const [left, top] = positions[destination];
-  character.getAnimations().forEach(animation => animation.cancel());
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches && previous !== destination) {
-    character.animate(path.map(([x, y]) => ({ left: x + "%", top: y + "%" })), { duration: 400, easing: "ease-in-out" });
+  const route = document.querySelector(".island-route");
+  const partialRoute = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  partialRoute.setAttribute("d", islandTrail(islandPositions().slice(0, index + 1)));
+  const destination = partialRoute.getTotalLength();
+  let start = Number(character.dataset.distance);
+  // Continue from the current position when another stop is tapped mid-slide.
+  if (islandMotion) {
+    const progress = islandMotion.animation.effect.getComputedTiming().progress ?? 1;
+    start = islandMotion.start + (islandMotion.destination - islandMotion.start) * progress;
+    islandMotion.animation.cancel();
   }
-  character.dataset.position = destination;
+  const [left, top] = islandPositions()[index];
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const duration = reducedMotion || Math.abs(destination - start) < 1 ? 0 : 400;
   character.style.left = left + "%";
   character.style.top = top + "%";
+  character.dataset.distance = destination;
+  if (duration) {
+    const frames = Array.from({ length: 41 }, (_, frame) => {
+      const point = route.getPointAtLength(start + (destination - start) * frame / 40);
+      return { left: point.x / 10 + "%", top: point.y / 6.25 + "%" };
+    });
+    const animation = character.animate(frames, { duration, easing: "ease-in-out" });
+    islandMotion = { animation, start, destination };
+  } else {
+    islandMotion = null;
+  }
+  document.querySelectorAll("[data-island-stop]").forEach(stop => {
+    stop.setAttribute("aria-pressed", String(stop === button));
+  });
   islandSelection = button.dataset.islandStop;
+  document.querySelector("#island-preview").innerHTML = '<p class="helper">Opening activity preview…</p>';
   islandTimer = setTimeout(() => {
     const activity = findActivity(islandSelection);
-    document.querySelector("#island-preview").innerHTML = `<div class="island-preview ${categoryClass(activity.category)}"><div><span class="category-label">${activity.category} · ${activity.skill}</span><h3>${activity.name}</h3><p>${activity.duration} min · ${activity.effort} effort</p></div>${DifficultyStars(activity.difficulty)}<a class="button primary" href="#/activity/${activity.id}">Open activity ${icon("arrow")}</a></div>`;
-  }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 400);
+    document.querySelector("#island-preview").innerHTML = `<div class="island-preview ${categoryClass(activity.category)}"><div><span class="category-label">${activity.category} · ${activity.skill}</span><h3>${activity.name}</h3><p>${activity.duration} min · ${activity.effort} effort</p></div>${DifficultyStars(activity)}<a class="button primary" href="#/activity/${activity.id}">Open activity ${icon("arrow")}</a></div>`;
+  }, duration);
 }

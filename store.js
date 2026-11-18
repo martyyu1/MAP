@@ -13,12 +13,14 @@ const state = {
   filters: { ...emptyFilters(), ...stored?.filters },
   // Older versions had one shared history. Preserve it in the first class.
   classes: stored?.classes ?? [
-    { id: "sunflower", name: "Sunflower Class", practiced: stored?.practiced ?? {}, starAwards: stored?.starAwards ?? {} },
-    { id: "bluebird", name: "Bluebird Class", practiced: {}, starAwards: {} }
+    { id: "sunflower", name: "Sunflower Class", practiced: stored?.practiced ?? {} },
+    { id: "bluebird", name: "Bluebird Class", practiced: {} }
   ]
 };
 delete state.practiced;
 delete state.starAwards;
+// Totals now come directly from completed activities, including older records.
+state.classes.forEach(classroom => { delete classroom.starAwards; });
 if (!state.classes.some(classroom => classroom.id === state.activeClassId)) {
   state.activeClassId = state.classes[0].id;
 }
@@ -31,8 +33,9 @@ function currentClass() {
 function practiceRecords() {
   return state.signedIn ? currentClass().practiced : {};
 }
-function classStarAwards() {
-  return state.signedIn ? currentClass().starAwards : {};
+function classStarTotal() {
+  const practiced = practiceRecords();
+  return activities.reduce((total, activity) => total + (practiced[activity.id] ? activity.difficulty : 0), 0);
 }
 function persist() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -47,10 +50,21 @@ function markPracticed(id) {
   const classroom = currentClass();
   if (!classroom.practiced[id]) {
     classroom.practiced[id] = new Date().toISOString();
-    if (state.showClassStars) classroom.starAwards[id] = findActivity(id).difficulty;
     persist();
     toast("Marked as practiced for " + classroom.name + ".");
   }
+  return true;
+}
+// Undoing completion also updates the derived class-star total.
+function unmarkPracticed(id) {
+  if (!state.signedIn) {
+    openAccountDialog();
+    return false;
+  }
+  const classroom = currentClass();
+  delete classroom.practiced[id];
+  persist();
+  toast("Practice mark removed for " + classroom.name + ".");
   return true;
 }
 function recordRecent(id) {
