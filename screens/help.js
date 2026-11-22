@@ -1,8 +1,1 @@
-function openHelp() {
-  const dialog = document.querySelector("#help-dialog");
-  dialog.innerHTML = `<div class="dialog-heading"><h2 id="help-title">A little help getting started</h2><form method="dialog"><button class="button secondary" aria-label="Close Help">${icon("close")}</button></form></div>
-    <dl class="help-topics"><dt>Difficulty stars</dt><dd>The number of stars shows difficulty, from 1 easy to 4 hard. Hollow stars mean not yet practiced; solid stars mean practiced for your current class. Tap the stars anywhere for a reminder.</dd><dt>Effort</dt><dd>Low, Medium, or High shows how much energy the activity takes. It is separate from skill difficulty.</dd><dt>Save and Saved</dt><dd>Tap a heart to save an activity. Open Saved to find it again and prepare a combined materials checklist.</dd><dt>Teacher account and classes</dt><dd>Log in with the demo teacher account, then use the class menu in the top bar. Each class has its own practice history and class stars. Saved activities are shared across your classes.</dd><dt>Mark as practiced</dt><dd>Mark as practiced only changes when you tap the button, not when you watch a video. Tap Undo on a practiced activity to remove an accidental mark for the current class. Any stars awarded for that activity are removed too.</dd></dl>
-    <label class="class-stars-option"><input type="checkbox" id="class-stars-toggle" ${state.showClassStars ? "checked" : ""}><span><strong>Show class stars</strong><small>Show a sticky Class stars summary at the top of the page. It includes all practiced activities for the current class, with each activity counted once. This switch only controls visibility.</small></span></label>
-    <p class="helper">This prototype uses a demo account. Class progress and other preferences are stored in this browser.</p><p class="content-notice">${CONTENT_NOTICE}</p>`;
-  dialog.showModal();
-}
+// Help was removed from the v05 interface.

@@ -19,28 +19,36 @@ function Logo() {
 }
 function DifficultyStars(activity) {
   const practiced = Boolean(practiceRecords()[activity.id]);
-  const explanation = "Star count shows difficulty, from 1 easy to 4 hard. Hollow stars mean not yet practiced; solid stars mean practiced for the current class.";
   const status = practiced ? "Practiced" : "Not yet practiced";
-  return `<span class="difficulty"><button type="button" class="star-button ${practiced ? "earned-stars" : ""}" data-tip aria-label="Difficulty ${activity.difficulty} of 4. ${status}. ${explanation}" aria-expanded="false" title="${explanation}"><span aria-hidden="true">${(practiced ? "★" : "☆").repeat(activity.difficulty)}</span></button><span class="star-tooltip" hidden>${explanation}</span></span>`;
+  return `<span class="difficulty"><span class="star-button ${practiced ? "earned-stars" : ""}" role="img" aria-label="Difficulty ${activity.difficulty} of 4. ${status}."><span aria-hidden="true">${(practiced ? "★" : "☆").repeat(activity.difficulty)}</span></span>`;
 }
 function EffortPill(effort) {
   return `<span class="effort effort-${effort.toLowerCase()}">${effort} effort</span>`;
 }
 function SaveButton(activity, full = false) {
   const saved = state.saved.includes(activity.id);
-  return `<button class="save-button ${saved ? "is-saved" : ""} ${full ? "button secondary" : ""}" data-save="${activity.id}" aria-pressed="${saved}" aria-label="${saved ? "Unsave" : "Save"} ${activity.name}">${icon("heart")}${full ? `<span>${saved ? "Saved" : "Save"}</span>` : ""}</button>`;
+  return `<button class="save-button ${saved ? "is-saved" : ""} ${full ? "button secondary" : ""}" data-save="${activity.id}" data-save-skill="${activity.skill}" aria-pressed="${saved}" aria-label="${saved ? "Unsave" : "Save"} ${activity.name}">${icon("heart")}${full ? `<span>${saved ? "Saved" : "Save"}</span>` : ""}</button>`;
 }
 // The same locally stored storybook artwork is used on Home and the map.
 function IslandArt(category) {
-  const filename = category === "Locomotor" ? "locomotor-island" : "object-control-island";
+  const filename = category === "Locomotor" ? "locomotor-island-orange" : "object-control-island";
   return `<img class="island-art" src="assets/${filename}.png" alt="" width="1584" height="992" decoding="async">`;
 }
+function sceneStyle(skill) {
+  const place = SKILL_PLACES[skill];
+  return "--atlas-x:" + (place.cell % 4) * 100 / 3 + "%;--atlas-y:" + Math.floor(place.cell / 4) * 100 + "%";
+}
+function placeArt(skill, extraClass = "") {
+  return `<span class="place-art ${categoryClass(skillCategory(skill))} ${extraClass}" style="${sceneStyle(skill)}" aria-hidden="true"></span>`;
+}
 function IslandCover(category) {
+  const coverPositions = [[24, 39], [50, 37], [76, 41], [48, 72]];
   return `<div class="category-cover">${IslandArt(category)}
     <svg class="cover-route" viewBox="0 0 1000 625" preserveAspectRatio="none" aria-hidden="true">
       <path d="M230 390C290 390 310 260 420 260S590 420 750 380"/>
       <circle cx="230" cy="390" r="13"/><circle cx="420" cy="260" r="13"/><circle cx="750" cy="380" r="13"/>
     </svg>
+    ${CATEGORIES[category].skills.slice(0, 4).map((skill, index) => `<span class="home-skill-place" style="left:${coverPositions[index][0]}%;top:${coverPositions[index][1]}%">${placeArt(skill)}</span>`).join("")}
     <img class="cover-explorer" src="assets/explorer-fox.png" alt="" width="60" height="72">
   </div>`;
 }
@@ -53,7 +61,7 @@ function ActivityArt(activity, label = "Activity illustration") {
     Throw: "M58 48 81 64 99 51M81 64 80 84 61 102M80 84 102 100",
     Roll: "M66 61 81 71 99 87M81 71 74 87 60 100M74 87 94 101",
     Kick: "M62 61 81 67 97 60M81 67 77 86 67 104M77 86 105 86"
-  }[activity.skill];
+  }[activity.skill] ?? "M63 64 83 57 100 67M80 62 75 83 58 98M75 83 98 94";
   return `<svg viewBox="0 0 270 150" role="img" aria-label="${label}" class="activity-art">
     <rect width="270" height="150" fill="${locomotor ? "var(--locomotor-tint)" : "#DCEBFF"}"/>
     <circle cx="226" cy="29" r="15" fill="#FFCF73"/><path d="M0 118Q70 97 128 120T270 114V150H0Z" fill="${locomotor ? "var(--locomotor-land)" : "#B5D8F2"}"/>
@@ -62,11 +70,13 @@ function ActivityArt(activity, label = "Activity illustration") {
     ${locomotor ? '<path d="m196 99 9-16 9 16Z" fill="var(--locomotor)"/>' : '<circle cx="188" cy="95" r="13" fill="#2F80ED"/><path d="M176 91q12 14 25 0" fill="none" stroke="#fff" stroke-width="2"/>'}
   </svg>`;
 }
-function ActivityCard(activity) {
+function ActivityCard(activity, focusSkill = activity.skill) {
+  activity = lessonForSkill(activity, focusSkill);
+  const href = "#/activity/" + activity.id + "?skill=" + encodeURIComponent(activity.skill);
   const practiced = Boolean(practiceRecords()[activity.id]);
   return `<article class="activity-card ${categoryClass(activity.category)}">
-    <div class="card-image"><a href="#/activity/${activity.id}" tabindex="-1" aria-hidden="true">${ActivityArt(activity)}<span class="play-badge">${icon("play", 18)}</span></a>${SaveButton(activity)}${practiced ? `<span class="practiced-flag">${icon("check", 16)} Practiced</span>` : ""}</div>
-    <div class="card-body"><span class="category-label">${activity.category} · ${activity.skill}</span><h3><a href="#/activity/${activity.id}">${activity.name}</a></h3>
+    <div class="card-image"><a href="${href}" tabindex="-1" aria-hidden="true">${ActivityArt(activity)}<img class="session-thumbnail" src="https://i.ytimg.com/vi/${activity.videoId}/hqdefault.jpg" alt="" loading="lazy" width="480" height="360"><span class="play-badge">${icon("play", 18)}</span></a>${SaveButton(activity)}${practiced ? `<span class="practiced-flag">${icon("check", 16)} Practiced</span>` : ""}</div>
+    <div class="card-body"><small class="session-label">MAP Session ${activity.sessionNumber} · ${formatTime(activity.video.length)} video</small><span class="category-label">${activity.category} · ${activity.skill}</span><h3><a href="${href}">${activity.name}</a></h3>
     <div class="card-level">${DifficultyStars(activity)}${EffortPill(activity.effort)}</div><p class="card-time">${activity.duration} min <span>·</span> ${activity.space === "Either" ? "Indoor or outdoor" : activity.space}</p><p class="card-materials">${activity.materials.map(item => item.name).join(", ") || "Nothing needed"}</p></div>
   </article>`;
 }
@@ -92,7 +102,7 @@ function PracticeButton(activity, placement = "activity") {
   return `<button class="${classes}" data-practiced="${activity.id}" aria-pressed="${practiced}" aria-label="${escapeHtml(accessibleLabel)}">${label}</button>`;
 }
 function renderTopbar() {
-  document.querySelector("#topbar").innerHTML = `<div class="topbar-inner">${Logo()}<nav aria-label="Main navigation"><a href="#/library" class="${location.hash.startsWith("#/library") ? "active" : ""}">Find Lesson</a><a href="#/saved" class="${location.hash === "#/saved" ? "active" : ""}">Saved (${state.saved.length})</a><button data-help>Help</button></nav>${AccountControls()}</div>`;
+  document.querySelector("#topbar").innerHTML = `<div class="topbar-inner">${Logo()}<nav aria-label="Main navigation"><a href="#/library" class="${location.hash.startsWith("#/library") ? "active" : ""}">Find Lesson</a><a href="#/saved" class="${location.hash === "#/saved" ? "active" : ""}">Saved (${state.saved.length})</a></nav>${AccountControls()}</div>`;
   renderClassStars();
 }
 
@@ -100,7 +110,7 @@ function renderTopbar() {
 // A persistent summary keeps class progress visible while scrolling.
 function renderClassStars() {
   const summary = document.querySelector("#class-stars-summary");
-  const visible = state.signedIn && state.showClassStars;
+  const visible = state.signedIn;
   summary.hidden = !visible;
   if (!visible) {
     summary.replaceChildren();

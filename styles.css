@@ -5,13 +5,13 @@
   --surface: #FFFFFF;
   --text: #1F2937;
   --muted: #52606E;
-  --locomotor: #E98ABB;
-  --locomotor-tint: #FCE7F2;
-  --locomotor-border: #EDBFDA;
-  --locomotor-land: #F6C5DF;
-  --locomotor-shadow: #EDB0D1;
-  --locomotor-deep: #CA67A2;
-  --locomotor-detail: #985479;
+  --locomotor: #E8AB59;
+  --locomotor-tint: #FFF3DF;
+  --locomotor-border: #EBD2A7;
+  --locomotor-land: #F5DBAC;
+  --locomotor-shadow: #E7C18B;
+  --locomotor-deep: #AB752C;
+  --locomotor-detail: #765326;
   --blue: #2F80ED;
   --blue-tint: #DCEBFF;
   --dark-blue: #1E5FBF;
@@ -500,3 +500,86 @@ dialog::backdrop { background: #1F293780; }
   .class-stars-title { font-size: 14px; }
   .class-stars-name { font-size: 13px; max-width: 130px; }
 }
+
+/* V5 skill destinations and two-level exploration. */
+.library-page { width: min(1480px, calc(100% - 48px)); }
+.library-layout { grid-template-columns: 210px minmax(0, 1fr); gap: 22px; }
+.category-section-head { align-items: flex-start; }
+.skill-chips { flex: 1; }
+.skill-chips button { min-height: 48px; }
+.session-label { display: block; font-size: 12px; font-weight: 800; color: var(--muted); margin-bottom: 5px; }
+.session-thumbnail { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.source-link { font-size: 15px; margin-top: 12px; font-weight: 800; color: var(--dark-blue); }
+.world-shell { border: 1px solid var(--locomotor-border); border-radius: 18px; overflow: hidden; background: white; }
+.world-shell.object-control { border-color: #B8D6FC; }
+.world-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px 18px; background: var(--locomotor-tint); }
+.object-control .world-toolbar { background: var(--blue-tint); }
+.world-toolbar h3 { font-size: 20px; }
+.world-toolbar p { margin-top: 4px; font-size: 14px; }
+.map-tools { display: flex; gap: 5px; align-items: center; }
+.map-tools button { min-width: 48px; border: 1px solid #A8B5BA; border-radius: 9px; background: white; font-weight: 900; padding: 8px 13px; }
+.map-tools output { min-width: 52px; text-align: center; font-size: 14px; font-weight: 800; }
+.world-viewport { height: 580px; position: relative; overflow: hidden; touch-action: none; cursor: grab; background: #A9DFE8; user-select: none; }
+.world-viewport.is-dragging { cursor: grabbing; }
+.world-canvas { width: 1600px; height: 1000px; position: absolute; transform-origin: 0 0; will-change: transform; }
+.world-canvas > .island-art { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.world-path { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.world-path path { fill: none; stroke: #FFF4D6; stroke-width: 15; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 23; }
+.skill-destination { position: absolute; left: calc(var(--place-x) - 135px); top: calc(var(--place-y) - 138px); width: 270px; height: 230px; border: 0; background: none; padding: 0; overflow: visible; }
+.place-art { display: block; width: 100%; height: 100%; background-repeat: no-repeat; background-size: 400% 200%; background-position: var(--atlas-x) var(--atlas-y); background-image: url("assets/locomotor-places-orange.png"); mask-image: radial-gradient(ellipse at center, black 52%, transparent 74%); }
+.place-art.object-control { background-image: url("assets/object-control-places.png"); }
+.place-label { position: absolute; z-index: 2; left: 50%; top: 92%; transform: translateX(-50%) scale(var(--label-scale, 1)); transform-origin: top center; display: grid; gap: 2px; width: 150px; padding: 7px 9px; border-radius: 12px; background: #FFFDF5; border: 2px solid var(--locomotor); box-shadow: 0 3px 8px #1F293724; line-height: 1.15; text-align: center; font-size: 12px; color: var(--text); }
+.object-control .place-label { border-color: var(--blue); }
+.place-label strong { font-size: 17px; font-weight: 900; }
+.place-label small { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.skill-destination:hover .place-label, .skill-destination:focus-visible .place-label { outline: 3px solid var(--dark-blue); outline-offset: 3px; }
+.world-fox { position: absolute; width: 90px; height: 108px; object-fit: contain; left: 28%; top: 69%; pointer-events: none; }
+.map-instructions { padding: 11px 16px; font-size: 13px; border-top: 1px solid var(--border); background: white; }
+.skill-stage { border: 1px solid var(--locomotor-border); border-radius: 18px; overflow: hidden; background: var(--locomotor-tint); }
+.skill-stage.object-control { background: #EAF3FF; border-color: #B8D6FC; }
+.skill-scene-hero { min-height: 350px; position: relative; overflow: hidden; isolation: isolate; display: flex; align-items: center; padding: 24px; }
+.scene-landscape { position: absolute; inset: 0; z-index: -2; opacity: .2; }
+.scene-landscape .island-art { width: 100%; height: 100%; object-fit: cover; object-position: center 65%; }
+.skill-scene-copy { width: 48%; position: relative; z-index: 1; }
+.skill-scene-copy h3 { font-size: 37px; margin-top: 16px; }
+.skill-scene-copy p { color: var(--text); margin-top: 6px; }
+.skill-scene-copy .place-name { font-size: 20px; font-weight: 900; }
+.skill-scene-copy .scene-goal { font-size: 16px; margin-top: 13px; }
+.scene-closeup { position: absolute; right: 1%; top: 0; width: 49%; height: 100%; mask-image: radial-gradient(ellipse at center, black 50%, transparent 75%); }
+.scene-lessons { padding: 22px; }
+.skill-stage .activity-grid { gap: 17px; }
+@media (max-width: 1050px) {
+  .library-layout { grid-template-columns: 185px minmax(0, 1fr); gap: 16px; }
+  .world-viewport { height: 530px; }
+  .world-toolbar { padding: 12px; }
+  .scene-lessons { padding: 14px; }
+}
+@media (max-width: 760px) {
+  .library-page { width: calc(100% - 24px); }
+  .library-layout { grid-template-columns: 1fr; }
+  .world-viewport { height: 520px; }
+  .world-toolbar { flex-direction: column; align-items: stretch; }
+  .map-tools { align-self: flex-end; }
+  .skill-scene-hero { min-height: 390px; padding: 20px; align-items: flex-start; }
+  .skill-scene-copy { width: 100%; }
+  .skill-scene-copy .scene-goal { max-width: 58%; }
+  .scene-closeup { width: 55%; height: 55%; top: auto; bottom: 0; right: -3%; }
+  .scene-lessons .activity-grid { grid-template-columns: 1fr; }
+}
+
+
+.compact-labels .place-label { width: 82px; padding: 5px; }
+.compact-labels .place-label strong { font-size: 12px; }
+.compact-labels .place-label > span, .compact-labels .place-label small { display: none; }
+
+
+@media (max-width: 760px) {
+  .category-section-head { flex-direction: column; align-items: stretch; }
+  .skill-chips { flex: auto; width: 100%; }
+  .skill-scene-copy .scene-goal { background: #FAF7F2E8; border-radius: 10px; padding: 8px; }
+}
+
+.home-skill-place { position: absolute; width: 25%; aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; }
+
+/* Keep the arrived destination clear while the explorer waits. */
+.skill-destination[aria-pressed="true"] .place-label { box-shadow: 0 0 0 3px var(--blue, #2F80ED), 0 6px 18px #17334d22; }

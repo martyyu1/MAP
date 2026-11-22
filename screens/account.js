@@ -13,7 +13,7 @@ function openAccountDialog() {
 // Refresh only the visible screen so switching classes preserves library filters
 // and the current teaching step.
 function refreshClassProgress() {
-  clearTimeout(islandTimer);
+  disposeIslandMap();
   if (screen === "library") updateLibrary();
   else if (screen === "saved") renderSaved();
   else if (screen === "activity" && currentActivity()) {

@@ -12,12 +12,15 @@ function toast(message) {
 function currentActivity() { return findActivity(activityId); }
 function route() {
   stopVideoPreview();
-  clearTimeout(islandTimer);
+  disposeIslandMap();
   videoTime = 0;
   const [path, query] = (location.hash.slice(1) || "/").split("?");
   const parts = path.split("/").filter(Boolean);
   screen = parts[0] || "home";
   activityId = parts[1] || "";
+  const routeSkill = new URLSearchParams(query).get("skill");
+  const rawActivity = activities.find(activity => activity.id === activityId);
+  if (rawActivity?.skillTags.includes(routeSkill)) state.lessonFocus[activityId] = routeSkill;
   document.body.classList.toggle("presentation", ["teach", "watch"].includes(screen));
   if (screen === "library") renderLibrary(new URLSearchParams(query));
   else if (screen === "saved") renderSaved();
@@ -94,6 +97,7 @@ document.addEventListener("change", event => {
     libraryState.category = input.value;
     libraryState.about = false;
     libraryState.skills = {};
+    libraryState.view = input.value ? "island" : "grid";
     updateLibrary();
   }
   if (input.id === "sort") {
@@ -104,11 +108,7 @@ document.addEventListener("change", event => {
     state.materialChecks[input.dataset.material] = input.checked;
     persist();
   }
-  if (input.id === "class-stars-toggle") {
-    state.showClassStars = input.checked;
-    persist();
-    renderClassStars();
-  }
+
 });
 document.addEventListener("click", event => {
   const target = event.target.closest("button");
@@ -128,13 +128,14 @@ document.addEventListener("click", event => {
     refreshClassProgress();
     toast("Logged out. Your class progress is saved in this browser.");
   }
-  if (target.hasAttribute("data-help")) openHelp();
   if (target.hasAttribute("data-tip")) {
     const tip = target.nextElementSibling;
     tip.hidden = !tip.hidden;
     target.setAttribute("aria-expanded", String(!tip.hidden));
   }
   if (data.save) {
+    const savedActivity = activities.find(activity => activity.id === data.save);
+    if (savedActivity?.skillTags.includes(data.saveSkill)) state.lessonFocus[data.save] = data.saveSkill;
     state.saved = state.saved.includes(data.save) ? state.saved.filter(id => id !== data.save) : [...state.saved, data.save];
     persist();
     if (screen === "saved") renderSaved();
@@ -160,14 +161,20 @@ document.addEventListener("click", event => {
     updateLibrary();
   }
   if (target.hasAttribute("data-skill")) {
+    if (!libraryState.category) libraryState.category = data.skillCategory;
     libraryState.skills[data.skillCategory] = data.skill;
+    syncFilters();
     updateLibrary();
   }
   if (data.view) {
     libraryState.view = data.view;
     updateLibrary();
   }
-  if (data.islandStop) selectIslandStop(target);
+  if (data.skillPlace) visitSkillPlace(data.skillPlace);
+  if (target.hasAttribute("data-all-skills")) {
+    libraryState.skills[libraryState.category] = "";
+    updateLibrary();
+  }
   if (target.id === "mobile-filters") {
     const expanded = target.getAttribute("aria-expanded") !== "true";
     target.setAttribute("aria-expanded", String(expanded));

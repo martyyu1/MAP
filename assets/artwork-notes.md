@@ -35,3 +35,7 @@ Large smiling orange-and-cream head, tiny body, rounded ears, ocean-blue
 backpack, sage explorer hat, and three-quarter pose facing right. Full body,
 feet, and tail in frame. Hand-painted matte gouache texture, crisp silhouette,
 without ground, scenery, text, or loose objects.
+
+
+## Warm orange revision
+Built-in imagegen edited locomotor-island-orange.png and locomotor-places-orange.png from the original assets. Prompt: preserve island composition and 4×2 seven-scene atlas layout, replace pink blossoms with golden apricot/amber and olive foliage, cream/yellow flowers and honey cottage tiles, retain turquoise water and storybook gouache style. Original assets retained.

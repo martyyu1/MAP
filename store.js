@@ -1,22 +1,26 @@
 // Keep the storage key so existing saved activities survive the upgrade.
-const STORAGE_KEY = "map-v02";
+const STORAGE_KEY = "map-v05";
 const emptyFilters = () => ({ group: "", space: "", time: "", equipment: "" });
 const defaultState = () => ({
   saved: [], recent: [], filters: emptyFilters(),
-  materialChecks: {}, showClassStars: false,
+  materialChecks: {},
   signedIn: false, activeClassId: "sunflower"
 });
 let stored;
-try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch {}
+try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem("map-v02")); } catch {}
 const state = {
   ...defaultState(), ...stored,
   filters: { ...emptyFilters(), ...stored?.filters },
+  lessonFocus: { ...stored?.lessonFocus },
   // Older versions had one shared history. Preserve it in the first class.
   classes: stored?.classes ?? [
     { id: "sunflower", name: "Sunflower Class", practiced: stored?.practiced ?? {} },
     { id: "bluebird", name: "Bluebird Class", practiced: {} }
   ]
 };
+// Retire the old cumulative time choices without changing other saved filters.
+if (!["", "under-5", "5-10", "10-20"].includes(state.filters.time)) state.filters.time = "";
+delete state.showClassStars;
 delete state.practiced;
 delete state.starAwards;
 // Totals now come directly from completed activities, including older records.
@@ -41,7 +45,10 @@ function persist() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
   catch { toast("Browser storage is unavailable. Changes will last for this visit."); }
 }
-function findActivity(id) { return activities.find(activity => activity.id === id); }
+function findActivity(id) {
+  const activity = activities.find(activity => activity.id === id);
+  return activity ? lessonForSkill(activity, state.lessonFocus[id] ?? activity.skill) : undefined;
+}
 function markPracticed(id) {
   if (!state.signedIn) {
     openAccountDialog();
@@ -72,12 +79,14 @@ function recordRecent(id) {
   persist();
 }
 function matchesActivity(activity, filters = state.filters, category = "", search = "", skills = {}) {
-  return (!category || activity.category === category) &&
-    (!skills[activity.category] || activity.skill === skills[activity.category]) &&
-    (!search || (activity.name + " " + activity.skill + " " + activity.category).toLowerCase().includes(search.toLowerCase().trim())) &&
+  const categories = category ? [category] : activity.categories;
+  const skillMatch = categories.some(group => activity.categories.includes(group) &&
+    (!skills[group] || activity.skillTags.includes(skills[group])));
+  return skillMatch &&
+    (!search || (activity.name + " " + activity.sessionTitle + " " + activity.skillTags.join(" ")).toLowerCase().includes(search.toLowerCase().trim())) &&
     (!filters.group || activity.group === filters.group) &&
     (!filters.space || activity.space === "Either" || activity.space === filters.space) &&
-    (!filters.time || activity.duration <= Number(filters.time)) &&
+    matchesTimeRange(activity.duration, filters.time) &&
     (!filters.equipment || activity.equipment === filters.equipment);
 }
 function combinedMaterials() {
@@ -92,4 +101,13 @@ function combinedMaterials() {
     });
   });
   return [...materials.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Non-overlapping classroom-duration groups: 10 minutes belongs to 5–10.
+function matchesTimeRange(minutes, range) {
+  if (!range) return true;
+  if (range === "under-5") return minutes < 5;
+  if (range === "5-10") return minutes >= 5 && minutes <= 10;
+  if (range === "10-20") return minutes > 10 && minutes <= 20;
+  return false;
 }
