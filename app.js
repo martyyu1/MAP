@@ -11,9 +11,8 @@ function toast(message) {
 }
 function currentActivity() { return findActivity(activityId); }
 function route() {
-  stopVideoPreview();
+  stopVideoPlayer();
   disposeIslandMap();
-  videoTime = 0;
   const [path, query] = (location.hash.slice(1) || "/").split("?");
   const parts = path.split("/").filter(Boolean);
   screen = parts[0] || "home";
@@ -182,10 +181,8 @@ document.addEventListener("click", event => {
   }
   if (data.printActivity) printActivity(data.printActivity);
   if (target.hasAttribute("data-print-materials")) printMaterials();
-  if (target.hasAttribute("data-play")) toggleVideoPreview();
   if (target.hasAttribute("data-timestamp")) {
-    videoTime = Number(data.timestamp);
-    updateVideoUI();
+    seekLessonVideo(Number(data.timestamp));
   }
   if (data.practiced) {
     const practiced = Boolean(practiceRecords()[data.practiced]);

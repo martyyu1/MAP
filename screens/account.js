@@ -17,7 +17,7 @@ function refreshClassProgress() {
   if (screen === "library") updateLibrary();
   else if (screen === "saved") renderSaved();
   else if (screen === "activity" && currentActivity()) {
-    stopVideoPreview();
+    stopVideoPlayer();
     renderActivity(currentActivity());
     updateVideoUI();
   }

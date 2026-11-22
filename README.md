@@ -46,7 +46,7 @@ interface icons and activity placeholders use inline SVG.
 Video titles, URLs, durations, and thumbnails come from the MAP Sessions playlist.
 Classroom metadata, skill associations, teaching guidance, photos, and clips are
 demonstration content awaiting Dr. Palmer's review.
-Playback previews simulate time. The website stores progress in the current
+Course and Watch pages embed the real YouTube videos, with native playback, fullscreen, and chapter seeking through the YouTube IFrame API. Playback does not mark an activity practiced. The website stores progress in the current
 browser. Login is a demonstration account, matching the original prototype.
 It does not create a real account or synchronize across devices. Saved activities
 and preparation checklists are shared across classes. Existing practice history

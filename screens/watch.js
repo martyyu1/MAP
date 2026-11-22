@@ -1,39 +1,86 @@
-// The video is a clearly marked placeholder with a timed preview.
-// It never writes practiced status.
-let videoTime = 0;
-let videoPlaying = false;
+// YouTube handles playback. Watching never changes class practice records.
+let lessonPlayer;
+let playerReady = false;
+let pendingVideoTime;
 let videoInterval;
-function stopVideoPreview() {
+let playerVersion = 0;
+let youtubeApiPromise;
+function loadYouTubeAPI() {
+  if (window.YT?.Player) return Promise.resolve(window.YT);
+  if (!youtubeApiPromise) {
+    youtubeApiPromise = new Promise((resolve, reject) => {
+      window.onYouTubeIframeAPIReady = () => resolve(window.YT);
+      const script = document.createElement("script");
+      script.src = "https://www.youtube.com/iframe_api";
+      script.onerror = () => { youtubeApiPromise = undefined; reject(new Error("YouTube API unavailable")); };
+      document.head.append(script);
+    });
+  }
+  return youtubeApiPromise;
+}
+function stopVideoPlayer() {
+  playerVersion += 1;
   clearInterval(videoInterval);
-  videoPlaying = false;
+  lessonPlayer?.destroy();
+  lessonPlayer = undefined;
+  playerReady = false;
+  pendingVideoTime = undefined;
 }
-function renderWatch(activity) {
-  document.querySelector("#main").innerHTML = `<div class="watch-screen ${categoryClass(activity.category)}"><div class="watch-toolbar"><h1>${activity.name}</h1><a class="button secondary" href="#/activity/${activity.id}" aria-label="Close Watch with the class">${icon("close", 32)}</a></div><div class="watch-layout"><section aria-label="Video player">${videoPlaceholder(activity, true)}<p class="watch-note">Video placeholder · Preview only</p></section><section class="watch-chapters"><h2>Video timestamps</h2>${chapterList(activity, true)}</section></div></div>`;
+function videoStatus(message) {
+  const status = document.querySelector(".player-status");
+  if (status) { status.textContent = message; status.hidden = !message; }
 }
-function updateVideoUI() {
-  const activity = currentActivity();
-  const control = document.querySelector("[data-play]");
-  if (!control || !activity) return;
-  control.innerHTML = videoPlaying ? '<span aria-hidden="true">Ⅱ</span><span>Pause preview</span>' : icon("play", 30) + '<span>Play preview</span>';
-  control.setAttribute("aria-label", videoPlaying ? "Pause video preview" : "Play video preview");
-  document.querySelectorAll("[data-video-time]").forEach(node => { node.textContent = formatTime(videoTime) + " / " + formatTime(activity.video.length); });
-  const chapters = activity.video.chapters;
-  const active = [...chapters].reverse().find(chapter => videoTime >= chapter.time);
+async function mountVideoPlayer() {
+  stopVideoPlayer();
+  const version = playerVersion;
+  const iframe = document.querySelector("#lesson-video");
+  if (!iframe) return;
+  try {
+    const YT = await loadYouTubeAPI();
+    if (version !== playerVersion || !iframe.isConnected) return;
+    lessonPlayer = new YT.Player(iframe, { events: {
+      onReady: () => {
+        if (version !== playerVersion) return;
+        playerReady = true;
+        if (pendingVideoTime !== undefined) seekLessonVideo(pendingVideoTime);
+        videoInterval = setInterval(updateVideoChapters, 500);
+      },
+      onError: () => {
+        if (version === playerVersion) videoStatus("This video cannot play here right now. Try the YouTube link below.");
+      },
+      onStateChange: () => { if (version === playerVersion) updateVideoChapters(); }
+    } });
+  } catch {
+    // The normal iframe player still works if the optional API is blocked.
+  }
+}
+function updateVideoChapters() {
+  if (!playerReady || !lessonPlayer?.getCurrentTime) return;
+  const time = lessonPlayer.getCurrentTime();
+  const active = [...(currentActivity()?.video.chapters ?? [])].reverse().find(chapter => time >= chapter.time);
   document.querySelectorAll("[data-timestamp]").forEach(button => {
     button.setAttribute("aria-current", String(Number(button.dataset.timestamp) === active?.time));
   });
 }
-function toggleVideoPreview() {
-  const activity = currentActivity();
-  if (videoPlaying) stopVideoPreview();
-  else {
-    if (videoTime >= activity.video.length) videoTime = 0;
-    videoPlaying = true;
-    videoInterval = setInterval(() => {
-      videoTime += 1;
-      if (videoTime >= activity.video.length) stopVideoPreview();
-      updateVideoUI();
-    }, 1000);
+function seekLessonVideo(time) {
+  if (playerReady) {
+    lessonPlayer.seekTo(time, true);
+    lessonPlayer.playVideo();
+    pendingVideoTime = undefined;
+    updateVideoChapters();
+  } else {
+    pendingVideoTime = time;
+    // A native embed fallback also supports chapter selection without the API.
+    const iframe = document.querySelector("#lesson-video");
+    if (iframe && !lessonPlayer) {
+      const url = new URL(iframe.src);
+      url.searchParams.set("start", Math.floor(time));
+      url.searchParams.set("autoplay", "1");
+      iframe.src = url.href;
+    }
   }
-  updateVideoUI();
+}
+function renderWatch(activity) {
+  document.querySelector("#main").innerHTML = `<div class="watch-screen ${categoryClass(activity.category)}"><div class="watch-toolbar"><h1>${activity.name}</h1><a class="button secondary" href="#/activity/${activity.id}" aria-label="Close Watch with the class">${icon("close", 32)}</a></div><div class="watch-layout"><section aria-label="Video player">${videoPlayer(activity, true)}</section><section class="watch-chapters"><h2>Video timestamps</h2>${chapterList(activity, true)}</section></div></div>`;
+  mountVideoPlayer();
 }

@@ -7,10 +7,10 @@ function photoPlaceholder(activity, step, index) {
 function chapterList(activity, large = false) {
   return `<div class="timestamp-list ${large ? "large-timestamps" : ""}">${activity.video.chapters.map(chapter => `<button data-timestamp="${chapter.time}" aria-label="Seek to ${formatTime(chapter.time)}, ${chapter.label}"><span class="timestamp-thumb" aria-hidden="true">${ActivityArt(activity)}</span><span class="timestamp-time">${formatTime(chapter.time)}</span><span>${chapter.label}</span></button>`).join("")}</div>`;
 }
-function videoPlaceholder(activity, large = false) {
-  return `<div class="video-placeholder ${large ? "watch-player" : ""}">${ActivityArt(activity, "Movement video placeholder")}
-    <div class="video-overlay"><button class="video-play" data-play aria-label="Play video preview">${icon("play", 30)}<span>Play preview</span></button><p>Video placeholder · ${formatTime(activity.video.length)}</p></div></div>
-    <p class="source-link"><a href="${activity.video.url}" target="_blank" rel="noopener">Watch MAP Session ${activity.sessionNumber} on YouTube ↗</a></p><div class="video-controls"><span data-video-time>0:00 / ${formatTime(activity.video.length)}</span><span>Placeholder preview</span></div>`;
+function videoPlayer(activity, large = false) {
+  const params = new URLSearchParams({ enablejsapi: "1", playsinline: "1", hl: "en", rel: "0", origin: location.origin });
+  return `<div class="embedded-video ${large ? "watch-player" : ""}"><iframe id="lesson-video" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(activity.videoId)}?${escapeHtml(params)}" title="${escapeHtml(activity.sessionTitle)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <p class="player-status" role="status" hidden></p><p class="source-link"><a href="${activity.video.url}" target="_blank" rel="noopener">Open on YouTube ↗</a></p>`;
 }
 function renderActivity(activity) {
   document.querySelector("#main").innerHTML = `<div class="page activity-page ${categoryClass(activity.category)}"><a class="back-link" href="#/library?category=${encodeURIComponent(activity.category)}&skill=${encodeURIComponent(activity.skill)}">← Movement Library</a>
@@ -19,11 +19,12 @@ function renderActivity(activity) {
     <p class="goal"><strong>Goal</strong> ${activity.goal}</p>
     <div class="activity-actions">${SaveButton(activity, true)}<a class="button primary" href="#/teach/${activity.id}">Teach ${icon("play")}</a><a class="button secondary" href="#/watch/${activity.id}">Watch with the class</a><button class="button secondary" data-print-activity="${activity.id}">${icon("print")} Print setup handout</button></div>
     
-    <div class="activity-preparation"><section class="video-section" aria-label="Instructional video">${videoPlaceholder(activity)}<h2>Video timestamps</h2>${chapterList(activity)}</section>
+    <div class="activity-preparation"><section class="video-section" aria-label="Instructional video">${videoPlayer(activity)}<h2>Video timestamps</h2>${chapterList(activity)}</section>
       <aside class="setup-panel"><h2>Materials</h2>${materialsChecklist(activity)}<h2>Setup</h2><p>${activity.setup}</p><div class="teacher-note"><strong>Watch. Guide. Practice.</strong><p>Use the video to introduce the skill, guide children through the steps, then give them time to practice.</p></div></aside></div>
     <section class="steps-section" aria-labelledby="steps-title"><h2 id="steps-title">Set up and steps</h2><ol class="steps-list">${activity.steps.map((step, i) => `<li>${photoPlaceholder(activity, step, i)}<div><span class="step-number">${i + 1}</span><h3>${step.title}</h3><p>${step.text}</p><blockquote>“${step.cue}”</blockquote></div></li>`).join("")}</ol><p class="practice-prompt">Then let children practice.</p></section>
     <section class="adjustments" aria-label="Adapt the activity">${adjustment(activity, "easier", "− Make it easier")}${adjustment(activity, "challenge", "+ Add a challenge")}</section>
     <section class="related-section"><h2>More ways to practice ${activity.skill}</h2><div class="activity-grid">${activity.related.map(findActivity).map(related => ActivityCard(related, activity.skill)).join("")}</div></section></div>`;
+  mountVideoPlayer();
 }
 function adjustment(activity, kind, title) {
   return `<details class="adjustment"><summary>${title}</summary><ul>${activity[kind].map(change => `<li>${escapeHtml(change)}</li>`).join("")}</ul><p><strong>Good for:</strong> ${activity[kind + "Good"]}</p></details>`;
