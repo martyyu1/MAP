@@ -89,7 +89,6 @@ document.addEventListener("change", event => {
   if (input.dataset.filter) {
     state.filters[input.dataset.filter] = input.value;
     persist();
-    if (screen === "home") updateHomeMatch();
     if (screen === "library") updateLibrary();
   }
   if (input.name === "category") {

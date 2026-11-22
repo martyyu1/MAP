@@ -80,10 +80,10 @@ function ActivityCard(activity, focusSkill = activity.skill) {
     <div class="card-level">${DifficultyStars(activity)}${EffortPill(activity.effort)}</div><p class="card-time">${activity.duration} min <span>·</span> ${activity.space === "Either" ? "Indoor or outdoor" : activity.space}</p><p class="card-materials">${activity.materials.map(item => item.name).join(", ") || "Nothing needed"}</p></div>
   </article>`;
 }
-function FilterPanel(location) {
+function FilterPanel(location, showHelper = true) {
   return `<div class="filter-fields ${location === "home" ? "horizontal" : ""}">${FILTER_FIELDS.map(field => `
-    <label class="filter-field"><span>${field.label}</span><select data-filter="${field.key}" aria-label="${field.label}" ${field.key === "equipment" ? `aria-describedby="${location}-equipment-help"` : ""}>${field.options.map(([value, label]) => `<option value="${value}" ${state.filters[field.key] === value ? "selected" : ""}>${label}</option>`).join("")}</select></label>`).join("")}</div>
-    <p class="helper" id="${location}-equipment-help">${EQUIPMENT_HELP}</p>`;
+    <label class="filter-field"><span>${field.label}</span><select data-filter="${field.key}" aria-label="${field.label}" ${field.key === "equipment" && showHelper ? `aria-describedby="${location}-equipment-help"` : ""}>${field.options.map(([value, label]) => `<option value="${value}" ${state.filters[field.key] === value ? "selected" : ""}>${label}</option>`).join("")}</select></label>`).join("")}</div>
+    ${showHelper ? `<p class="helper" id="${location}-equipment-help">${EQUIPMENT_HELP}</p>` : ""}`;
 }
 function practicedText(activity) {
   if (!practiceRecords()[activity.id]) return "";

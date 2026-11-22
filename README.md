@@ -88,8 +88,7 @@ mean not yet practiced, and solid stars mean practiced in the active class.
 ## Activity naming
 
 Cards show the verified movement-pair title and MAP Session number. Each session
-can be reached through either of its skill tags, with contextual demonstration
-guidance for the selected skill.
+belongs to one primary skill, with demonstration guidance for that skill.
 
 Source: https://www.youtube.com/playlist?list=PLxRvADrMevjgfUwo7tNqUGbZ_dB2WvTod
 
@@ -106,8 +105,7 @@ and 2-Hand Strike.
 
 The playlist has 49 distinct videos, including two videos with the same Session
 28 title. Both are retained. Most videos contain one skill from each category,
-so the same video can appear under two skills. Practice status, saving, and stars
-refer to its canonical video record and are shared across those skill views.
+but each video is assigned to one primary skill and one island for browsing. Practice status, saving, and stars refer to its unique canonical video record.
 Class practice records remain independent.
 
 Skill associations follow words in the verified video titles and are provisional.
@@ -135,7 +133,7 @@ placeholder, as in the earlier prototype.
   meadow, riverbank, dribbling courtyard, equipment cottage, and lakeside dock.
 
 Checks include 49 unique videos, all 15 skills, contextual lesson content,
-shared per-video completion across skills, independent class progress, undo,
+unique per-video completion, independent class progress, undo,
 live filtering, default Island view, Grid switching, camera zoom/pan/reset,
 desktop and phone layout, and application console health.
 
@@ -145,3 +143,7 @@ desktop and phone layout, and application console health.
 - Review badges, star explanations and Help have been removed from the interface.
 - Signed-in teachers always see class stars, with no visibility toggle.
 - On the island, click a destination to move the fox and stay there. Click the same destination again after arrival to open lessons. Top skill tabs still open lessons directly.
+
+
+### Exclusive video classification
+Each of the 49 videos has one primary skill and one category. Movement-pair titles and companion skills remain searchable, but never duplicate the video across islands or skill destinations. Indoor/outdoor overlap is intentional for Either activities. Primary skill assignments are provisional for the prototype.

@@ -38,7 +38,7 @@ function renderIsland(matches) {
           <svg class="world-path" viewBox="0 0 1600 1000" aria-hidden="true"><path d="${worldPath(skills)}"/></svg>
           ${skills.map(skill => {
             const place = SKILL_PLACES[skill];
-            const lessons = matches.filter(activity => activity.skillTags.includes(skill));
+            const lessons = matches.filter(activity => activity.category === category && activity.skill === skill);
             const practiced = lessons.filter(activity => practiceRecords()[activity.id]).length;
             return `<button class="skill-destination" data-skill-place="${skill}" style="--place-x:${place.x}%;--place-y:${place.y}%" aria-label="${skill}, ${lessons.length} lessons${state.signedIn ? ", " + practiced + " practiced" : ""}">
               ${placeArt(skill)}
@@ -53,7 +53,7 @@ function renderIsland(matches) {
 }
 function renderSkillScene(category, skill, matches) {
   const place = SKILL_PLACES[skill];
-  const lessons = matches.filter(activity => activity.skillTags.includes(skill));
+  const lessons = matches.filter(activity => activity.category === category && activity.skill === skill);
   const practiced = lessons.filter(activity => practiceRecords()[activity.id]).length;
   return `${skillHeader(category)}
     <section class="skill-stage ${categoryClass(category)}" aria-label="${skill} lessons">

@@ -79,11 +79,10 @@ function recordRecent(id) {
   persist();
 }
 function matchesActivity(activity, filters = state.filters, category = "", search = "", skills = {}) {
-  const categories = category ? [category] : activity.categories;
-  const skillMatch = categories.some(group => activity.categories.includes(group) &&
-    (!skills[group] || activity.skillTags.includes(skills[group])));
+  const skillMatch = (!category || activity.category === category) &&
+    (!skills[activity.category] || activity.skill === skills[activity.category]);
   return skillMatch &&
-    (!search || (activity.name + " " + activity.sessionTitle + " " + activity.skillTags.join(" ")).toLowerCase().includes(search.toLowerCase().trim())) &&
+    (!search || (activity.name + " " + activity.sessionTitle + " " + activity.sourceSkillTags.join(" ")).toLowerCase().includes(search.toLowerCase().trim())) &&
     (!filters.group || activity.group === filters.group) &&
     (!filters.space || activity.space === "Either" || activity.space === filters.space) &&
     matchesTimeRange(activity.duration, filters.time) &&

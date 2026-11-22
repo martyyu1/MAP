@@ -587,3 +587,63 @@ dialog::backdrop { background: #1F293780; }
 .embedded-video { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 16px; background: #162433; }
 .embedded-video iframe { display: block; width: 100%; height: 100%; border: 0; }
 .player-status { padding: 10px 12px; margin-top: 8px; background: var(--background); border: 1px solid var(--border); border-radius: 8px; }
+
+/* Home: a spacious booking-style finder leads into the island categories. */
+.lesson-finder { padding: 28px; border-radius: 26px; background: #FFF0D9; border: 1px solid #F0DDBD; }
+.finder-heading { min-height: 205px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 0 28px; position: relative; }
+.finder-copy { position: relative; z-index: 1; padding: 20px 0 30px; }
+.finder-copy h1 { font-size: clamp(32px, 3.3vw, 46px); line-height: 1.12; letter-spacing: -.025em; }
+.finder-copy p { font-size: 21px; margin-top: 13px; color: var(--text); }
+.finder-fox { width: 205px; height: 225px; object-fit: contain; align-self: flex-end; margin: -15px 36px -12px 0; }
+.lesson-finder .booking-panel { position: relative; padding: 24px; border-radius: 18px; border-color: #ECE3D5; box-shadow: 0 8px 22px #8B672414; }
+.lesson-finder .booking-controls { display: grid; grid-template-columns: minmax(0, 1fr) 170px; align-items: end; gap: 20px; }
+.lesson-finder .booking-controls > .button { margin: 0; min-height: 58px; }
+.lesson-finder .filter-fields.horizontal { gap: 18px; }
+.lesson-finder .filter-field { gap: 8px; }
+.lesson-finder .filter-field > span { font-size: 16px; }
+.lesson-finder select { min-height: 58px; padding: 12px 14px; border-color: #B9C2CC; border-radius: 10px; font-size: 17px; }
+.booking-footer { display: flex; align-items: baseline; justify-content: space-between; gap: 22px; margin-top: 15px; }
+.booking-footer .helper { margin: 0; max-width: 66%; font-size: 13px; }
+.booking-footer .home-match { margin: 0; flex-shrink: 0; }
+.home-islands { margin-top: 34px; }
+.home-section-heading { margin-bottom: 20px; }
+.home-section-heading h2 { font-size: 30px; line-height: 1.2; }
+.home-section-heading p { margin-top: 7px; font-size: 17px; }
+@media (max-width: 1000px) {
+  .finder-heading { padding: 0 10px; min-height: 180px; }
+  .finder-fox { width: 160px; height: 190px; margin-right: 10px; }
+  .finder-copy p { font-size: 18px; }
+  .lesson-finder .booking-controls { grid-template-columns: 1fr; gap: 18px; }
+  .lesson-finder .booking-controls > .button { width: 100%; min-height: 52px; }
+  .booking-footer { flex-wrap: wrap; gap: 10px; }
+  .booking-footer .helper { max-width: 100%; }
+  .booking-footer .home-match { text-align: left; }
+}
+@media (max-width: 600px) {
+  .lesson-finder { padding: 18px 14px 14px; border-radius: 20px; }
+  .finder-heading { min-height: 150px; padding: 0 2px; gap: 4px; }
+  .finder-copy { padding: 8px 0 22px; flex: 1; }
+  .finder-copy h1 { font-size: 30px; max-width: 250px; }
+  .finder-copy p { font-size: 16px; max-width: 220px; line-height: 1.45; margin-top: 10px; }
+  .finder-fox { width: 104px; height: 140px; margin: 0 -7px 0 0; }
+  .lesson-finder .booking-panel { padding: 16px; border-radius: 14px; }
+  .lesson-finder .filter-fields.horizontal { gap: 16px 12px; grid-template-columns: 1fr 1fr; }
+  .lesson-finder .filter-field > span { font-size: 14px; }
+  .lesson-finder select { min-height: 52px; padding: 10px; font-size: 16px; }
+  .booking-footer { margin-top: 14px; }
+  .booking-footer .helper { font-size: 12px; }
+  .booking-footer .home-match { font-size: 13px; }
+  .home-islands { margin-top: 28px; }
+  .home-section-heading h2 { font-size: 27px; }
+  .home-section-heading p { font-size: 16px; }
+}
+
+.finder-copy { max-width: 760px; }
+.finder-copy h1 { max-width: 700px; }
+
+@media (min-width: 1001px) {
+  .finder-heading { gap: 16px; }
+  .finder-copy { flex: 1; min-width: 0; max-width: none; }
+  .finder-copy h1 { max-width: none; white-space: nowrap; font-size: clamp(29px, calc(2.65vw + 2px), 40px); letter-spacing: -.035em; }
+  .finder-fox { flex-shrink: 0; width: 170px; margin-right: 8px; }
+}

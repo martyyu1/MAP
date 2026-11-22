@@ -758,9 +758,15 @@ function classroomDuration(skillTags) {
   const score = skillTags.reduce((total, skill) => total + (complexity[skill] ?? 1), 0);
   return score <= 1 ? 4 : score <= 2 ? 8 : 15;
 }
+// Prototype ownership: a video belongs to exactly one primary skill/island.
+// Pair titles remain untouched; companion movements are searchable source metadata.
+const primarySkillOverrides = {
+  3: "Toss", 7: "1-Hand Strike", 19: "Toss",
+  23: "1-Hand Strike", 39: "1-Hand Strike", 43: "Toss"
+};
 const activities = mapSessions.map(session => {
   const legacy = legacyActivities.find(activity => activity.id === legacyVideoIds[session.videoId]);
-  const skill = legacy?.skill ?? session.skillTags[0];
+  const skill = primarySkillOverrides[session.sessionNumber] ?? legacy?.skill ?? session.skillTags[0];
   const category = skillCategory(skill);
   const objectSkills = session.skillTags.filter(tag => skillCategory(tag) === "Object Control");
   const needsBat = objectSkills.some(tag => tag.includes("Strike"));
@@ -768,7 +774,8 @@ const activities = mapSessions.map(session => {
   return {
     ...legacy, ...movementDetails(skill), ...session,
     id: legacy?.id ?? "session-" + session.videoId,
-    category, skill, categories: [...new Set(session.skillTags.map(skillCategory))],
+    category, skill, categories: [category],
+    sourceSkillTags: [...session.skillTags], skillTags: [skill],
     placeholder: true,
     difficulty: legacy?.difficulty ?? 1 + session.sessionNumber % 3,
     effort: legacy?.effort ?? (category === "Locomotor" ? "High" : "Medium"),

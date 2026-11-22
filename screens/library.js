@@ -60,7 +60,7 @@ function skillHeader(category) {
 }
 function renderGrid(matches) {
   return Object.keys(CATEGORIES).filter(category => !libraryState.category || libraryState.category === category).map(category => {
-    const group = matches.filter(activity => activity.categories.includes(category) && (!libraryState.skills[category] || activity.skillTags.includes(libraryState.skills[category])));
-    return `<section class="library-category">${skillHeader(category)}${group.length ? `<div class="activity-grid">${group.map(activity => ActivityCard(activity, libraryState.skills[category] || activity.skillTags.find(skill => skillCategory(skill) === category))).join("")}</div>` : `<div class="category-empty">${emptyLibrary()}</div>`}</section>`;
+    const group = matches.filter(activity => activity.category === category && (!libraryState.skills[category] || activity.skill === libraryState.skills[category]));
+    return `<section class="library-category">${skillHeader(category)}${group.length ? `<div class="activity-grid">${group.map(activity => ActivityCard(activity, libraryState.skills[category] || activity.skill)).join("")}</div>` : `<div class="category-empty">${emptyLibrary()}</div>`}</section>`;
   }).join("");
 }
